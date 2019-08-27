@@ -397,7 +397,7 @@ def update_svm_graph(
 
 
     print(app.encuestas["X"].columns)
-    X = app.encuestas["X"][["sucursal", "canal"]].to_numpy()
+    X = app.encuestas["X"][["satisfaccion_inicial", "canal"]].to_numpy()
     y = app.encuestas["y"].to_numpy()
 
     X_train, X_test, y_train, y_test = app.split_data(X, y)
