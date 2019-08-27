@@ -125,11 +125,10 @@ def get_histgb_classifier(X_train, y_train):
     return model
 
 
-def get_svc_classifier(X_train, y_train):
-    model_path = "models/linearsvc.model"
+def get_svc_classifier(col1,col2, X_train, y_train):
+    model_path = "models/linearsvc-{}-{}.model".format(col1, col2)
     model = load_model(model_path)
-    #if not model:
-    if True:
+    if not model:
         #X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.3, random_state=42)
         param_grid = [{'C': [0.001, 0.01, 0.1, 1, 10], 'loss': ['hinge', 'squared_hinge']}]
         linear_svc = LinearSVC(max_iter=10000)

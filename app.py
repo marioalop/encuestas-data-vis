@@ -15,6 +15,13 @@ from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
 from encuestas_workflow import load_data, split_data, get_svc_classifier
 
+cols = ['marca', 'status', 'plazo_de_gestion', 'sucursal', 'canal',
+     'satisfaccion_inicial', 'recomendacion_inicial',
+     'incidente_o_retorno_inicial', 'categoria', 'puesto_involucrado',
+     'estado', 'resp_alerta']
+
+cols_opts = [{"label": i.capitalize().replace("_", " "), "value": i} for i in cols]
+
 
 app = dash.Dash(
     __name__,
@@ -74,7 +81,7 @@ app.layout = html.Div(
                             id="banner-title",
                             children=[
                                 html.A(
-                                    "Support Vector Machine (SVM) Explorer",
+                                    "Diplo encuestas - Support Vector Machine Explorer",
                                     href="https://github.com/plotly/dash-svm",
                                     style={
                                         "text-decoration": "none",
@@ -83,13 +90,7 @@ app.layout = html.Div(
                                 )
                             ],
                         ),
-                        html.A(
-                            id="banner-logo",
-                            children=[
-                                html.Img(src=app.get_asset_url("dash-logo-new.png"))
-                            ],
-                            href="https://plot.ly/products/dash/",
-                        ),
+
                     ],
                 )
             ],
@@ -110,47 +111,21 @@ app.layout = html.Div(
                                     id="first-card",
                                     children=[
                                         drc.NamedDropdown(
-                                            name="Select Dataset",
-                                            id="dropdown-select-dataset",
-                                            options=[
-                                                {"label": "Moons", "value": "moons"},
-                                                {
-                                                    "label": "Linearly Separable",
-                                                    "value": "linear",
-                                                },
-                                                {
-                                                    "label": "Circles",
-                                                    "value": "circles",
-                                                },
-                                            ],
+                                            name="Select feature",
+                                            id="dropdown-select-col1",
+                                            options=cols_opts,
                                             clearable=False,
                                             searchable=False,
-                                            value="moons",
+                                            value="canal",
                                         ),
-                                        drc.NamedSlider(
-                                            name="Sample Size",
-                                            id="slider-dataset-sample-size",
-                                            min=100,
-                                            max=500,
-                                            step=100,
-                                            marks={
-                                                str(i): str(i)
-                                                for i in [100, 200, 300, 400, 500]
-                                            },
-                                            value=300,
-                                        ),
-                                        drc.NamedSlider(
-                                            name="Noise Level",
-                                            id="slider-dataset-noise-level",
-                                            min=0,
-                                            max=1,
-                                            marks={
-                                                i / 10: str(i / 10)
-                                                for i in range(0, 11, 2)
-                                            },
-                                            step=0.1,
-                                            value=0.2,
-                                        ),
+                                        drc.NamedDropdown(
+                                            name="Select feature",
+                                            id="dropdown-select-col2",
+                                            options=cols_opts,
+                                            clearable=False,
+                                            searchable=False,
+                                            value="satisfaccion_inicial",
+                                        )
                                     ],
                                 ),
                                 drc.Card(
@@ -170,102 +145,7 @@ app.layout = html.Div(
                                         ),
                                     ],
                                 ),
-                                drc.Card(
-                                    id="last-card",
-                                    children=[
-                                        drc.NamedDropdown(
-                                            name="Kernel",
-                                            id="dropdown-svm-parameter-kernel",
-                                            options=[
-                                                {
-                                                    "label": "Radial basis function (RBF)",
-                                                    "value": "rbf",
-                                                },
-                                                {"label": "Linear", "value": "linear"},
-                                                {
-                                                    "label": "Polynomial",
-                                                    "value": "poly",
-                                                },
-                                                {
-                                                    "label": "Sigmoid",
-                                                    "value": "sigmoid",
-                                                },
-                                            ],
-                                            value="rbf",
-                                            clearable=False,
-                                            searchable=False,
-                                        ),
-                                        drc.NamedSlider(
-                                            name="Cost (C)",
-                                            id="slider-svm-parameter-C-power",
-                                            min=-2,
-                                            max=4,
-                                            value=0,
-                                            marks={
-                                                i: "{}".format(10 ** i)
-                                                for i in range(-2, 5)
-                                            },
-                                        ),
-                                        drc.FormattedSlider(
-                                            id="slider-svm-parameter-C-coef",
-                                            min=1,
-                                            max=9,
-                                            value=1,
-                                        ),
-                                        drc.NamedSlider(
-                                            name="Degree",
-                                            id="slider-svm-parameter-degree",
-                                            min=2,
-                                            max=10,
-                                            value=3,
-                                            step=1,
-                                            marks={
-                                                str(i): str(i) for i in range(2, 11, 2)
-                                            },
-                                        ),
-                                        drc.NamedSlider(
-                                            name="Gamma",
-                                            id="slider-svm-parameter-gamma-power",
-                                            min=-5,
-                                            max=0,
-                                            value=-1,
-                                            marks={
-                                                i: "{}".format(10 ** i)
-                                                for i in range(-5, 1)
-                                            },
-                                        ),
-                                        drc.FormattedSlider(
-                                            id="slider-svm-parameter-gamma-coef",
-                                            min=1,
-                                            max=9,
-                                            value=5,
-                                        ),
-                                        html.Div(
-                                            id="shrinking-container",
-                                            children=[
-                                                html.P(children="Shrinking"),
-                                                dcc.RadioItems(
-                                                    id="radio-svm-parameter-shrinking",
-                                                    labelStyle={
-                                                        "margin-right": "7px",
-                                                        "display": "inline-block",
-                                                    },
-                                                    options=[
-                                                        {
-                                                            "label": " Enabled",
-                                                            "value": "True",
-                                                        },
-                                                        {
-                                                            "label": " Disabled",
-                                                            "value": "False",
-                                                        },
-                                                    ],
-                                                    value="True",
-                                                ),
-                                            ],
-                                        ),
-                                    ],
-                                ),
+
                             ],
                         ),
                         html.Div(
@@ -287,22 +167,8 @@ app.layout = html.Div(
 )
 
 
-@app.callback(
-    Output("slider-svm-parameter-gamma-coef", "marks"),
-    [Input("slider-svm-parameter-gamma-power", "value")],
-)
-def update_slider_svm_parameter_gamma_coef(power):
-    scale = 10 ** power
-    return {i: str(round(i * scale, 8)) for i in range(1, 10, 2)}
 
 
-@app.callback(
-    Output("slider-svm-parameter-C-coef", "marks"),
-    [Input("slider-svm-parameter-C-power", "value")],
-)
-def update_slider_svm_parameter_C_coef(power):
-    scale = 10 ** power
-    return {i: str(round(i * scale, 8)) for i in range(1, 10, 2)}
 
 
 @app.callback(
@@ -319,60 +185,17 @@ def reset_threshold_center(n_clicks, figure):
     return value
 
 
-# Disable Sliders if kernel not in the given list
-@app.callback(
-    Output("slider-svm-parameter-degree", "disabled"),
-    [Input("dropdown-svm-parameter-kernel", "value")],
-)
-def disable_slider_param_degree(kernel):
-    return kernel != "poly"
-
-
-@app.callback(
-    Output("slider-svm-parameter-gamma-coef", "disabled"),
-    [Input("dropdown-svm-parameter-kernel", "value")],
-)
-def disable_slider_param_gamma_coef(kernel):
-    return kernel not in ["rbf", "poly", "sigmoid"]
-
-
-@app.callback(
-    Output("slider-svm-parameter-gamma-power", "disabled"),
-    [Input("dropdown-svm-parameter-kernel", "value")],
-)
-def disable_slider_param_gamma_power(kernel):
-    return kernel not in ["rbf", "poly", "sigmoid"]
-
 
 @app.callback(
     Output("div-graphs", "children"),
     [
-        Input("dropdown-svm-parameter-kernel", "value"),
-        Input("slider-svm-parameter-degree", "value"),
-        Input("slider-svm-parameter-C-coef", "value"),
-        Input("slider-svm-parameter-C-power", "value"),
-        Input("slider-svm-parameter-gamma-coef", "value"),
-        Input("slider-svm-parameter-gamma-power", "value"),
-        Input("dropdown-select-dataset", "value"),
-        Input("slider-dataset-noise-level", "value"),
-        Input("radio-svm-parameter-shrinking", "value"),
+        Input("dropdown-select-col1", "value"),
+        Input("dropdown-select-col2", "value"),
         Input("slider-threshold", "value"),
-        Input("slider-dataset-sample-size", "value"),
+
     ],
 )
-def update_svm_graph(
-    kernel,
-    degree,
-    C_coef,
-    C_power,
-    gamma_coef,
-    gamma_power,
-    dataset,
-    noise,
-    shrinking,
-    threshold,
-    sample_size,
-):
+def update_svm_graph(col1, col2, threshold):
     t_start = time.time()
     h = 0.3  # step size in the mesh
 
@@ -385,19 +208,10 @@ def update_svm_graph(
     print(X_train.shape)
 
     """
-    i = ['marca', 'status', 'plazo_de_gestion', 'sucursal', 'canal',
-     'satisfaccion_inicial', 'recomendacion_inicial',
-     'incidente_o_retorno_inicial', 'categoria', 'puesto_involucrado',
-     'estado', 'resp_alerta']
-
-    print("kernel {},degree {},C_coef {},C_power {},gamma_coef {},gamma_power {},"
-          "dataset {},noise {},shrinking {},threshold {},sample_size{},".format(kernel,degree,C_coef,C_power,
-                                                                                gamma_coef,gamma_power,dataset,
-                                                                                noise,shrinking,threshold,sample_size))
 
 
     print(app.encuestas["X"].columns)
-    X = app.encuestas["X"][["satisfaccion_inicial", "canal"]].to_numpy()
+    X = app.encuestas["X"][[col1, col2]].to_numpy()
     y = app.encuestas["y"].to_numpy()
 
     X_train, X_test, y_train, y_test = app.split_data(X, y)
@@ -417,18 +231,10 @@ def update_svm_graph(
     # xx = app.encuestas["XX"]
     # yy = app.encuestas["yy"]
 
-    C = C_coef * 10 ** C_power
-    gamma = gamma_coef * 10 ** gamma_power
-
-
-    if shrinking == "True":
-        flag = True
-    else:
-        flag = False
 
     # Train SVM
     #clf = SVC(C=C, kernel=kernel, degree=degree, gamma=gamma, shrinking=flag)
-    clf = app.get_svc_classifier(X_train, y_train)
+    clf = app.get_svc_classifier(col1, col2, X_train, y_train)
     #..clf.fit(X_train, y_train)
 
     # Plot the decision boundary. For that, we will assign a color to each
